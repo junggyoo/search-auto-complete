@@ -1,5 +1,5 @@
 import { Loader2 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import { Input } from "./components/ui/input";
 import { fetchWikiPrefixSearch, type PrefixSearchResult } from "./services/api";
@@ -11,6 +11,7 @@ function App() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [results, setResults] = useState<PrefixSearchResult>({ items: [] });
 	const isOpen = !!search && !isLoading;
+	const abortRef = useRef<AbortController | null>(null);
 
 	useEffect(() => {
 		if (!search.trim()) {
@@ -18,13 +19,17 @@ function App() {
 			setIsLoading(false);
 			return;
 		}
-		setIsLoading(true);
 
+		setIsLoading(true);
 		const timer = setTimeout(async () => {
+			abortRef.current?.abort();
+			abortRef.current = new AbortController();
+
 			try {
-				await fetchWikiPrefixSearch(search).then((data) => {
-					setResults(data);
+				const data = await fetchWikiPrefixSearch(search, {
+					signal: abortRef.current?.signal,
 				});
+				setResults(data);
 			} catch (error) {
 				console.error(error);
 			} finally {
@@ -32,7 +37,10 @@ function App() {
 			}
 		}, 400);
 
-		return () => clearTimeout(timer);
+		return () => {
+			clearTimeout(timer);
+			abortRef.current?.abort();
+		};
 	}, [search]);
 
 	return (
