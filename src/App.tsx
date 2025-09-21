@@ -1,47 +1,23 @@
+import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
 
 import { Input } from "./components/ui/input";
+import { useDebounceFetch } from "./hooks/useDebounceFetch";
 import { fetchWikiPrefixSearch, type PrefixSearchResult } from "./services/api";
 
 import "./App.css";
 
 function App() {
 	const [search, setSearch] = useState("");
-	const [isLoading, setIsLoading] = useState(false);
-	const [results, setResults] = useState<PrefixSearchResult>({ items: [] });
+
+	const { data, isLoading } = useDebounceFetch<PrefixSearchResult>({
+		deps: [search],
+		delay: 300,
+		enabled: !!search.trim(),
+		fetcher: (signal) => fetchWikiPrefixSearch(search, { limit: 10, signal }),
+	});
+
 	const isOpen = !!search && !isLoading;
-	const abortRef = useRef<AbortController | null>(null);
-
-	useEffect(() => {
-		if (!search.trim()) {
-			setResults({ items: [] });
-			setIsLoading(false);
-			return;
-		}
-
-		setIsLoading(true);
-		const timer = setTimeout(async () => {
-			abortRef.current?.abort();
-			abortRef.current = new AbortController();
-
-			try {
-				const data = await fetchWikiPrefixSearch(search, {
-					signal: abortRef.current?.signal,
-				});
-				setResults(data);
-			} catch (error) {
-				console.error(error);
-			} finally {
-				setIsLoading(false);
-			}
-		}, 300);
-
-		return () => {
-			clearTimeout(timer);
-			abortRef.current?.abort();
-		};
-	}, [search]);
 
 	return (
 		<main className="p-4">
@@ -53,7 +29,7 @@ function App() {
 				{isOpen && (
 					<div className="absolute top-10 left-0 w-full bg-white rounded-md shadow-md border border-gray-200">
 						<div className="p-2">
-							{results.items.map((item) => (
+							{(data?.items ?? []).map((item) => (
 								<div
 									key={item.pageId}
 									onClick={() =>
