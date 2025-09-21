@@ -35,7 +35,7 @@ function App() {
 			} finally {
 				setIsLoading(false);
 			}
-		}, 400);
+		}, 300);
 
 		return () => {
 			clearTimeout(timer);
@@ -54,8 +54,18 @@ function App() {
 					<div className="absolute top-10 left-0 w-full bg-white rounded-md shadow-md border border-gray-200">
 						<div className="p-2">
 							{results.items.map((item) => (
-								<div key={item.pageId}>
-									<p>{item.title}</p>
+								<div
+									key={item.pageId}
+									onClick={() =>
+										window.open(
+											`https://ko.wikipedia.org/wiki/${item.title}`,
+											"_blank"
+										)
+									}
+								>
+									<p className="cursor-pointer hover:bg-gray-100 p-2 rounded-md">
+										{item.title}
+									</p>
 								</div>
 							))}
 						</div>
