@@ -1,5 +1,6 @@
 import { useMemo, useRef, useState } from "react";
-import { Search } from "./components/search/Search";
+
+import { Search } from "./components/search";
 import { useAutocomplete } from "./hooks/useAutocomplete";
 import { useListNavigation } from "./hooks/useListNavigation";
 import { useOutsideClick } from "./hooks/useOutsideClick";
@@ -40,10 +41,10 @@ function App() {
 
 	const onInputKeyDown = useComboboxInputKeydown({
 		open,
-		setOpen,
-		activeIndex,
-		onActiveIndexChange,
 		query,
+		activeIndex,
+		setOpen,
+		onActiveIndexChange,
 		onEnterWithoutSelection: () => {
 			window.open(
 				`https://ko.wikipedia.org/w/index.php?search=${encodeURIComponent(
@@ -57,8 +58,8 @@ function App() {
 	});
 
 	const shouldShow = useMemo(
-		() => open && (isLoading || items.length > 0 || !!error || !!query.trim()),
-		[open, isLoading, items.length, error, query]
+		() => open && !!query.trim() && (items.length > 0 || !!error || !isLoading),
+		[open, query, items.length, error, isLoading]
 	);
 
 	return (
@@ -68,13 +69,12 @@ function App() {
 					<Search.Control>
 						<Search.Input
 							value={query}
-							onChange={(v) => {
+							onChange={(v: string) => {
 								setQuery(v);
 								if (!open) setOpen(true);
 							}}
 							onFocus={() => setOpen(true)}
 							onKeyDown={onInputKeyDown}
-							expanded={shouldShow}
 							placeholder="위키백과에서 검색…"
 						/>
 						<Search.IndicatorGroup>
@@ -110,7 +110,6 @@ function App() {
 									/>
 								))}
 							</Search.List>
-							<Search.Loading visible={isLoading} />
 							<Search.Empty
 								visible={
 									!isLoading && !error && !!query.trim() && items.length === 0
