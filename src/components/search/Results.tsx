@@ -16,7 +16,9 @@ export function ResultsPositioner({
 }
 
 export function ResultsContent({ children }: { children: React.ReactNode }) {
-	return <div className="max-h-80 overflow-auto py-1">{children}</div>;
+	return (
+		<div className="h-96 overflow-auto py-1 scroll-smooth">{children}</div>
+	);
 }
 
 export function ResultsEmpty(props: { visible: boolean }) {

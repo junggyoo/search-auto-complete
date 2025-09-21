@@ -10,7 +10,7 @@ export function useAutocomplete(query: string) {
 		deps: [query],
 		delay: 300,
 		enabled: !!query.trim(),
-		fetcher: (signal) => fetchWikiPrefixSearch(query, { limit: 10, signal }),
+		fetcher: (signal) => fetchWikiPrefixSearch(query, { limit: 15, signal }),
 	});
 	const items = useMemo(() => data?.items ?? [], [data]);
 	return { items, isLoading, error } as const;

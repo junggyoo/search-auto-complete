@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { highlightMatches } from "../../utils/highlightMatches";
 import { useListboxCtx } from "./context";
 import type { SearchItem } from "./types";
@@ -13,9 +13,18 @@ export function ListItem(props: {
 }) {
 	const { item, active, query, onPointerEnter, onPointerLeave, onSelect } =
 		props;
+
+	const btnRef = useRef<HTMLButtonElement>(null);
+
+	useEffect(() => {
+		if (!active) return;
+		btnRef.current?.scrollIntoView({ block: "nearest", inline: "nearest" });
+	}, [active]);
+
 	return (
 		<li role="option" aria-selected={active}>
 			<button
+				ref={btnRef}
 				type="button"
 				onMouseEnter={onPointerEnter}
 				onMouseLeave={onPointerLeave}
